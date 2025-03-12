@@ -71,8 +71,25 @@ vector<int> LinuxParser::Pids() {
 // TODO: Read and return the system memory utilization
 float LinuxParser::MemoryUtilization() { return 0.0; }
 
-// TODO: Read and return the system uptime
-long LinuxParser::UpTime() { return 0; }
+/// @brief Read and return the system uptime
+///
+/// File format:
+/// The first value represents the total number of seconds the system has been
+/// up. The second value is the sum of how much time each core has spent idle,
+/// in seconds. Consequently, the second value may be greater than the overall
+/// system uptime on systems with multiple cores.
+/// @return uptime in seconds
+long LinuxParser::UpTime() {
+  string uptime;
+  string line;
+  std::ifstream stream(kProcDirectory + kUptimeFilename);
+  if (stream.is_open()) {
+    std::getline(stream, line);
+    std::istringstream linestream(line);
+    linestream >> uptime;
+  }
+  return std::stol(uptime);
+}
 
 // TODO: Read and return the number of jiffies for the system
 long LinuxParser::Jiffies() { return 0; }
