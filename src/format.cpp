@@ -4,10 +4,9 @@
 
 using std::string;
 
-// TODO: Complete this helper function
-// INPUT: Long int measuring seconds
-// OUTPUT: HH:MM:SS
-// REMOVE: [[maybe_unused]] once you define the function
+/// @brief convert seconds to HH:MM:SS format
+/// @param seconds number of seconds
+/// @return string representation of seconds in HH:MM:SS format
 string Format::ElapsedTime(long seconds) {
   // break it down
   int hrs, mins, secs;
@@ -18,7 +17,10 @@ string Format::ElapsedTime(long seconds) {
   return ToPaddedString(hrs) + ":" + ToPaddedString(mins) + ":" +
          ToPaddedString(secs);
 }
-// convert int to string and pad if necessary
+
+/// @brief convert int to string and pad if necessary
+/// @param val integer to convert
+/// @return string representation of val n3with leading '0' if necessary
 string Format::ToPaddedString(int val) {
   std::string str = "";
   if (val < 10) str += "0";
