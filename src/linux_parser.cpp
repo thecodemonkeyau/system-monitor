@@ -107,11 +107,42 @@ long LinuxParser::IdleJiffies() { return 0; }
 // TODO: Read and return CPU utilization
 vector<string> LinuxParser::CpuUtilization() { return {}; }
 
-// TODO: Read and return the total number of processes
-int LinuxParser::TotalProcesses() { return 0; }
+/// @brief Read and return the total number of processes
+///
+/// File format: data is on a separate line in the form
+/// `processes <number>`
+/// @return total number of processes
+int LinuxParser::TotalProcesses() {
+  std::string line, key, value;
+  std::ifstream stream(kProcDirectory + kStatFilename);
+  if (stream.is_open()) {  // we only want to top row for simple impl
+    while (line.rfind("processes", 0 != 0)) {
+      std::getline(stream, line);
+      std::istringstream linestream(line);
+      linestream >> key >> value;
+      break;
+    }
+  }
+  return std::stoi(value);  // doesnt handle empty string
+}
 
-// TODO: Read and return the number of running processes
-int LinuxParser::RunningProcesses() { return 0; }
+/// Read and return the number of running processes
+///
+/// File format: data is on a separate line in the form
+/// `procs_running <number>`
+/// @return number of running processes
+int LinuxParser::RunningProcesses() {
+  std::string line, key, value;
+  std::ifstream stream(kProcDirectory + kStatFilename);
+  if (stream.is_open()) {  // we only want to top row for simple impl
+    while (line.rfind("procs_running") == std::string::npos) {
+      std::getline(stream, line);
+    }
+    std::istringstream linestream(line);
+    linestream >> key >> value;
+  }
+  return std::stoi(value);
+}
 
 // TODO: Read and return the command associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
