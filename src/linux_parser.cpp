@@ -69,7 +69,33 @@ vector<int> LinuxParser::Pids() {
 }
 
 // TODO: Read and return the system memory utilization
-float LinuxParser::MemoryUtilization() { return 0.0; }
+float LinuxParser::MemoryUtilization() {
+  string line;
+  string key;
+  string value;
+
+  int total_memory = 0;
+  int free_memory = 0;
+
+  std::ifstream filestream(kProcDirectory + kMeminfoFilename);
+  if (filestream.is_open()) {
+    while (std::getline(filestream, line)) {
+      std::remove_if(line.begin(), line.end(), isspace);
+      std::replace(line.begin(), line.end(), ':', ' ');
+      std::istringstream linestream(line);
+      while (linestream >> key >> value) {
+        if (key == "MemTotal") {
+          total_memory = std::stoi(value);
+        } else if (key == "MemFree") {
+          free_memory = std::stoi(value);
+        } else {
+          continue;  // noop
+        }
+      }
+    }
+  }
+  return (float)(total_memory - free_memory) / total_memory;
+}
 
 /// @brief Read and return the system uptime
 ///
@@ -91,21 +117,64 @@ long LinuxParser::UpTime() {
   return std::stol(uptime);
 }
 
-// TODO: Read and return the number of jiffies for the system
-long LinuxParser::Jiffies() { return 0; }
+/// Read and return the number of jiffies for the system
+/// based on stack overflow amswer
+/// @see
+/// https://stackoverflow.com/questions/23367857/accurate-calculation-of-cpu-usage-given-in-percentage-in-linux
+/// @return total number of jiffies
+long LinuxParser::Jiffies() { return ActiveJiffies() + IdleJiffies(); }
 
-// TODO: Read and return the number of active jiffies for a PID
-// REMOVE: [[maybe_unused]] once you define the function
-long LinuxParser::ActiveJiffies(int pid [[maybe_unused]]) { return 0; }
+/// @brief Read and return the number of active jiffies for the system
+///
+/// based on stack overflow amswer
+/// @see
+/// https://stackoverflow.com/questions/23367857/accurate-calculation-of-cpu-usage-given-in-percentage-in-linux
+/// @return number of active jiffies
+long LinuxParser::ActiveJiffies() {
+  // Read and return the number of active jiffies for the system
+  auto jiffies = CpuUtilization();
+  return stol(jiffies[CPUStates::kUser_]) + stol(jiffies[CPUStates::kNice_]) +
+         stol(jiffies[CPUStates::kSystem_]) + stol(jiffies[CPUStates::kIRQ_]) +
+         stol(jiffies[CPUStates::kSoftIRQ_]) +
+         stol(jiffies[CPUStates::kSteal_]);
+}
 
-// TODO: Read and return the number of active jiffies for the system
-long LinuxParser::ActiveJiffies() { return 0; }
+/// @brief Read and return the number of idle jiffies for the system
+/// based on stack overflow amswer
+/// @see
+/// https://stackoverflow.com/questions/23367857/accurate-calculation-of-cpu-usage-given-in-percentage-in-linux
+/// @return number of idle jiffies
+long LinuxParser::IdleJiffies() {
+  // Read and return the number of idle jiffies for the system
+  auto jiffies = CpuUtilization();
+  return stol(jiffies[CPUStates::kIdle_]) + stol(jiffies[CPUStates::kIOwait_]);
+}
 
-// TODO: Read and return the number of idle jiffies for the system
-long LinuxParser::IdleJiffies() { return 0; }
+/// @brief Read and return CPU utilization valused
+///
+/// File format: data is on a separate line in the form
+/// `cpu <user> <nice> <system> <idle> <iowait> <irq> <softirq> <steal>
+/// <guest> <guest_nice>`
+/// @return vector of strings representing the CPU utilization
+vector<string> LinuxParser::CpuUtilization() {
+  string line;
+  vector<string> cpu_utilization = {};
+  std::ifstream stream(kProcDirectory + kStatFilename);
+  if (stream.is_open()) {  // we only want to top row for simple impl
+    std::getline(stream, line);
+    std::istringstream linestream(line);
+    // skip the first word "cpu*"
+    string cpu;
+    linestream >> cpu;
 
-// TODO: Read and return CPU utilization
-vector<string> LinuxParser::CpuUtilization() { return {}; }
+    while (linestream) {
+      string value;
+      linestream >> value;
+      cpu_utilization.push_back(value);
+    }
+  }
+  return cpu_utilization;
+}
 
 /// @brief Read and return the total number of processes
 ///
@@ -126,7 +195,7 @@ int LinuxParser::TotalProcesses() {
   return std::stoi(value);  // doesnt handle empty string
 }
 
-/// Read and return the number of running processes
+/// @brief Read and return the number of running processes
 ///
 /// File format: data is on a separate line in the form
 /// `procs_running <number>`
@@ -143,6 +212,14 @@ int LinuxParser::RunningProcesses() {
   }
   return std::stoi(value);
 }
+
+// ==============================================================================
+// Per process data calclations
+// ==============================================================================
+
+// TODO: Read and return the number of active jiffies for a PID
+// REMOVE: [[maybe_unused]] once you define the function
+long LinuxParser::ActiveJiffies(int pid [[maybe_unused]]) { return 0; }
 
 // TODO: Read and return the command associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
