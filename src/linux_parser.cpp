@@ -3,6 +3,7 @@
 #include <dirent.h>
 #include <unistd.h>
 
+#include <filesystem>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -12,7 +13,9 @@ using std::string;
 using std::to_string;
 using std::vector;
 
-// DONE: An example of how to read data from the filesystem
+/// @brief An example of how to read data from the filesystem
+/// provided by Udacity
+/// @return the operating system name
 string LinuxParser::OperatingSystem() {
   string line;
   string key;
@@ -35,7 +38,9 @@ string LinuxParser::OperatingSystem() {
   return value;
 }
 
-// DONE: An example of how to read data from the filesystem
+/// @brief An example of how to read data from the filesystem
+/// provided by Udacity
+/// @return the kernel version
 string LinuxParser::Kernel() {
   string os, kernel, version;
   string line;
@@ -48,23 +53,22 @@ string LinuxParser::Kernel() {
   return kernel;
 }
 
-// BONUS: Update this to use std::filesystem
+/// @brief read PIDs frrom the /proc directory
+/// Modified Udacity example to use std::filesystem
+/// @return vector of integers representing the PIDs
 vector<int> LinuxParser::Pids() {
   vector<int> pids;
-  DIR* directory = opendir(kProcDirectory.c_str());
-  struct dirent* file;
-  while ((file = readdir(directory)) != nullptr) {
-    // Is this a directory?
-    if (file->d_type == DT_DIR) {
-      // Is every character of the name a digit?
-      string filename(file->d_name);
+  // use std::filesystem to iterate over the directory
+  for (const auto &entry :
+       std::filesystem::directory_iterator(kProcDirectory)) {
+    if (entry.is_directory()) {  // check if it is a directory
+      string filename = entry.path().filename().string();
       if (std::all_of(filename.begin(), filename.end(), isdigit)) {
-        int pid = stoi(filename);
+        int pid = std::stoi(filename);  // convert to int using std lib
         pids.push_back(pid);
       }
     }
   }
-  closedir(directory);
   return pids;
 }
 
@@ -93,7 +97,7 @@ float LinuxParser::MemoryUtilization() {
         } else if (key == "MemFree") {
           free_memory = std::stoi(value);
         }
-        if (total_memory != 0 && free_memory != 0) { // exit early
+        if (total_memory != 0 && free_memory != 0) {  // exit early
           break;
         }
       }
