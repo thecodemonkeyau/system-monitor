@@ -14,7 +14,7 @@ float Processor::Utilization() {
   auto total =idle + nonIdle; // more efficient not to call Jiffies()
 
   // need deltas to calculate current % usage
-  auto totald = float(total) - prevTotal_;      // change in total usage
+  auto totald = float(total) - float(prevTotal_);      // change in total usage
   auto idled = float(idle) - float(prevIdle_);  // change in idle usage
   auto percentage =
       (totald - idled) / totald;  // percent change in active usage
