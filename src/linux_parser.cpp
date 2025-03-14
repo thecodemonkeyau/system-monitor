@@ -68,7 +68,11 @@ vector<int> LinuxParser::Pids() {
   return pids;
 }
 
-// TODO: Read and return the system memory utilization
+/// @brief Read and return the system memory utilization
+/// File format:
+/// MemTotal:  <value in kB>  # total memory
+/// MemFree:   <value in kB>  # free memory
+/// @return memory utilization as a percentage (0.0 - 1.0)
 float LinuxParser::MemoryUtilization() {
   string line;
   string key;
@@ -88,8 +92,9 @@ float LinuxParser::MemoryUtilization() {
           total_memory = std::stoi(value);
         } else if (key == "MemFree") {
           free_memory = std::stoi(value);
-        } else {
-          continue;  // noop
+        }
+        if (total_memory != 0 && free_memory != 0) { // exit early
+          break;
         }
       }
     }
