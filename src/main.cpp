@@ -3,5 +3,5 @@
 
 int main() {
   System system;
-  NCursesDisplay::Display(system);  // default processes = 10
+  NCursesDisplay::Display(system, 15);  // default processes = 10
 }
