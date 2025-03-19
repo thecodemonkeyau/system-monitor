@@ -9,6 +9,7 @@
 
 class System {
  public:
+  enum SortBy { kPid, kUser, kCpu, kMem, kTime, kCmd };
   Processor& Cpu();                   // TODO: See src/system.cpp
   std::vector<Process>& Processes();  // TODO: See src/system.cpp
   float MemoryUtilization();          // TODO: See src/system.cpp
@@ -17,11 +18,18 @@ class System {
   int RunningProcesses();             // TODO: See src/system.cpp
   std::string Kernel();               // TODO: See src/system.cpp
   std::string OperatingSystem();      // TODO: See src/system.cpp
+  void SetOrderAsc(bool order_asc);
+  bool GetOrderAsc();
+  void SortProcesses(SortBy col);
 
   // TODO: Define any necessary private members
  private:
   Processor cpu_ = {};
   std::vector<Process> processes_ = {};
+  static SortBy sort_by_;
+  static bool order_asc_;
+
+  void DoSort();
 };
 
 #endif

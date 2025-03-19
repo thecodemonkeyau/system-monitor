@@ -22,19 +22,37 @@ system."
 You need to properly format the uptime. Refer to the comments mentioned in
 format. cpp for formatting the uptime.*/
 
-// TODO: Return the system's CPU
+// static member so we can update and retain the sort order
+System::SortBy System::sort_by_{System::SortBy::kCpu};
+bool System::order_asc_{false};
+
+/// @brief Return the system's CPU
+/// @return system's CPU
 Processor& System::Cpu() { return cpu_; }
 
-// TODO: Return a container composed of the system's processes
-vector<Process>& System::Processes() { return processes_; }
+/// @brief fetches a container composed of the system's Processes
+/// @return a container composed of the system's Processes
+vector<Process>& System::Processes() {
+  auto pids = LinuxParser::Pids();
+  processes_.clear();
+  for (auto pid : pids) {
+    Process process(pid);
+    processes_.push_back(process);
+  }
+  SortProcesses(sort_by_);
+  return processes_;
+}
 
-// TODO: Return the system's kernel identifier (string)
+/// Return the system's kernel identifier (string)
+/// @return kernel identifier
 std::string System::Kernel() { return LinuxParser::Kernel(); }
 
-// TODO: Return the system's memory utilization
-float System::MemoryUtilization() { return 0.0; }
+/// Return the system's memory utilization
+/// @return memory utilization
+float System::MemoryUtilization() { return LinuxParser::MemoryUtilization(); }
 
-// TODO: Return the operating system name
+/// Return the operating system name
+/// @return operating system name
 std::string System::OperatingSystem() { return LinuxParser::OperatingSystem(); }
 
 /// Return the number of processes actively running on the system
@@ -45,5 +63,64 @@ int System::RunningProcesses() { return LinuxParser::RunningProcesses(); }
 /// @return total number of processes
 int System::TotalProcesses() { return LinuxParser::TotalProcesses(); }
 
-// TODO: Return the number of seconds since the system started running
+/// Return the number of seconds since the system started running
+/// @return number of seconds since the system started running
 long int System::UpTime() { return LinuxParser::UpTime(); }
+
+void System::SetOrderAsc(bool order_asc) { order_asc_ = order_asc; }
+bool System::GetOrderAsc() { return order_asc_; }
+
+void System::SortProcesses(SortBy col) {
+  // order_asc_ = (sort_by_ == col);  // if you choose the same column again,
+  // reverse the order
+  sort_by_ = col;  // sort order changed, remember this
+  DoSort();
+}
+
+void System::DoSort() {
+  switch (sort_by_) {
+    case SortBy::kCpu:
+      std::sort(processes_.begin(), processes_.end(),
+                [](Process& a, Process& b) {
+                  if (order_asc_) return a < b;
+                  return a > b;
+                });
+      break;
+    case SortBy::kUser:
+      std::sort(processes_.begin(), processes_.end(),
+                [](Process& a, Process& b) {
+                  if (order_asc_) return a.User() < b.User();
+                  return a.User() > b.User();
+                });
+      break;
+    case SortBy::kMem:
+      // need to convert to numeric values for sorting
+      std::sort(processes_.begin(), processes_.end(),
+                [](Process& a, Process& b) {
+                  if (order_asc_) return a.Ram() < b.Ram();
+                  return a.Ram() > b.Ram();
+                });
+      break;
+    case SortBy::kTime:
+      std::sort(processes_.begin(), processes_.end(),
+                [](Process& a, Process& b) {
+                  if (order_asc_) return a.UpTime() < b.UpTime();
+                  return a.UpTime() > b.UpTime();
+                });
+      break;
+    case SortBy::kPid:
+      std::sort(processes_.begin(), processes_.end(),
+                [](Process& a, Process& b) {
+                  if (order_asc_) return a.Pid() < b.Pid();
+                  return a.Pid() > b.Pid();
+                });
+      break;
+    case SortBy::kCmd:
+      std::sort(processes_.begin(), processes_.end(),
+                [](Process& a, Process& b) {
+                  if (order_asc_) return a.Command() < b.Command();
+                  return a.Command() > b.Command();
+                });
+      break;
+  }
+}
