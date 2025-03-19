@@ -64,6 +64,7 @@ void NCursesDisplay::DisplayProcesses(std::vector<Process>& processes,
   int const ram_column{26};
   int const time_column{35};
   int const command_column{46};
+
   wattron(window, COLOR_PAIR(2));
   mvwprintw(window, ++row, pid_column, "PID");
   mvwprintw(window, row, user_column, "USER");
@@ -73,15 +74,15 @@ void NCursesDisplay::DisplayProcesses(std::vector<Process>& processes,
   mvwprintw(window, row, command_column, "COMMAND");
   wattroff(window, COLOR_PAIR(2));
   for (int i = 0; i < n; ++i) {
-    // You need to take care of the fact that the cpu utilization has already
-    // been multiplied by 100.
-    //  Clear the line
+    // Clear the line
     mvwprintw(window, ++row, pid_column,
               (string(window->_maxx - 2, ' ').c_str()));
 
     mvwprintw(window, row, pid_column, "%s",
               to_string(processes[i].Pid()).c_str());
     mvwprintw(window, row, user_column, "%s", processes[i].User().c_str());
+
+    // multiply by 100 for %. incoming value is 0 < cpu < 1
     float cpu = processes[i].CpuUtilization() * 100;
     mvwprintw(window, row, cpu_column, "%s",
               to_string(cpu).substr(0, 4).c_str());
@@ -95,7 +96,7 @@ void NCursesDisplay::DisplayProcesses(std::vector<Process>& processes,
 }
 
 /// @brief handle user key presses.
-/// @details supported keys:
+/// @details supported commands:
 ///   - 'q' to quit
 ///   - 'o' to toggle sort order
 ///   - 'c' to sort by CPU
@@ -106,9 +107,10 @@ void NCursesDisplay::DisplayProcesses(std::vector<Process>& processes,
 ///   - 'x' to sort by Command
 /// @param system the system object to manipulate
 /// @return the character pressed
-char handleKeyPress(System& system) {
+char NCursesDisplay::handleKeyPress(System& system) {
   char ch = getch();
-  flushinp();
+  flushinp();  // clear the input buffer to eliminate delays due to multiple key
+               // presses
   switch (ch) {
     case 'o':
       system.SetOrderAsc(!system.GetOrderAsc());
@@ -138,11 +140,11 @@ char handleKeyPress(System& system) {
 }
 
 void NCursesDisplay::Display(System& system, int n) {
-  initscr();              // start ncurses
-  noecho();               // do not print input values
-  cbreak();               // terminate ncurses on ctrl + c
-  start_color();          // enable color
-  nodelay(stdscr, TRUE);  // disable blocking waiting for kb input
+  initscr();              ///< start ncurses
+  noecho();               ///< do not print input values
+  cbreak();               ///< terminate ncurses on ctrl + c
+  start_color();          ///< enable color
+  nodelay(stdscr, TRUE);  ///< disable blocking on waiting for user input
 
   int x_max{getmaxx(stdscr)};
   WINDOW* system_window = newwin(9, x_max - 1, 0, 0);

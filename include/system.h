@@ -10,26 +10,29 @@
 class System {
  public:
   enum SortBy { kPid, kUser, kCpu, kMem, kTime, kCmd };
-  Processor& Cpu();                   // TODO: See src/system.cpp
-  std::vector<Process>& Processes();  // TODO: See src/system.cpp
-  float MemoryUtilization();          // TODO: See src/system.cpp
-  long UpTime();                      // TODO: See src/system.cpp
-  int TotalProcesses();               // TODO: See src/system.cpp
-  int RunningProcesses();             // TODO: See src/system.cpp
-  std::string Kernel();               // TODO: See src/system.cpp
-  std::string OperatingSystem();      // TODO: See src/system.cpp
-  void SetOrderAsc(bool order_asc);
+  Processor& Cpu();
+  std::vector<Process>& Processes();
+  float MemoryUtilization();
+  long UpTime();  ///< change to returning long for consistency
+  int TotalProcesses();
+  int RunningProcesses();
+  std::string Kernel();
+  std::string OperatingSystem();
+  void SetOrderAsc(
+      bool order_asc);  ///< to manipulate the sort order of the processes
   bool GetOrderAsc();
   void SortProcesses(SortBy col);
 
-  // TODO: Define any necessary private members
  private:
   Processor cpu_ = {};
   std::vector<Process> processes_ = {};
-  static SortBy sort_by_;
-  static bool order_asc_;
 
-  void DoSort();
+  static SortBy
+      sort_by_;  ///< this needs to persist when processes are reloaded
+  static bool
+      order_asc_;  ///< this needs to persist when processes are reloaded
+
+  void DoSort();  ///< does the heavy lifting for the sorting
 };
 
 #endif

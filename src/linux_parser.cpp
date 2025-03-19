@@ -111,8 +111,7 @@ float LinuxParser::MemoryUtilization() {
 }
 
 /// @brief Read and return the system uptime
-///
-/// File format:
+/// @details File format:
 /// The first value represents the total number of seconds the system has been
 /// up. The second value is the sum of how much time each core has spent idle,
 /// in seconds. Consequently, the second value may be greater than the overall
@@ -130,7 +129,7 @@ long LinuxParser::UpTime() {
   return std::stol(uptime);
 }
 
-/// Read and return the number of jiffies for the system
+/// @brief Read and return the number of jiffies for the system
 /// based on stack overflow amswer
 /// @see
 /// https://stackoverflow.com/questions/23367857/accurate-calculation-of-cpu-usage-given-in-percentage-in-linux
@@ -138,7 +137,6 @@ long LinuxParser::UpTime() {
 long LinuxParser::Jiffies() { return ActiveJiffies() + IdleJiffies(); }
 
 /// @brief Read and return the number of active jiffies for the system
-///
 /// based on stack overflow amswer
 /// @see
 /// https://stackoverflow.com/questions/23367857/accurate-calculation-of-cpu-usage-given-in-percentage-in-linux
@@ -153,7 +151,6 @@ long LinuxParser::ActiveJiffies() {
 }
 
 /// @brief Read and return the number of idle jiffies for the system
-/// @return number of idle jiffies
 /// @details based on stack overflow answer
 /// @see
 /// https://stackoverflow.com/questions/23367857/accurate-calculation-of-cpu-usage-given-in-percentage-in-linux
@@ -165,8 +162,7 @@ long LinuxParser::IdleJiffies() {
 }
 
 /// @brief Read and return CPU utilization valused
-///
-/// File format: data is on a separate line in the form
+/// @details File format: data is on a separate line in the form
 /// `cpu <user> <nice> <system> <idle> <iowait> <irq> <softirq> <steal>
 /// <guest> <guest_nice>`
 /// @return vector of strings representing the CPU utilization
@@ -191,8 +187,7 @@ vector<string> LinuxParser::CpuUtilization() {
 }
 
 /// @brief Read and return the total number of processes
-///
-/// File format: data is on a separate line in the form
+/// @details File format: data is on a separate line in the form
 /// `processes <number>`
 /// @return total number of processes
 int LinuxParser::TotalProcesses() {
@@ -210,8 +205,7 @@ int LinuxParser::TotalProcesses() {
 }
 
 /// @brief Read and return the number of running processes
-///
-/// File format: data is on a separate line in the form
+/// @details File format: data is on a separate line in the form
 /// `procs_running <number>`
 /// @return number of running processes
 int LinuxParser::RunningProcesses() {
@@ -340,5 +334,5 @@ string LinuxParser::Ram(int pid) {
     linestream >> key >> value;
     value = std::to_string(std::stol(value));
   }
-  return value;  // RAM is in kB
+  return value;  // RAM usage in kB
 }

@@ -4,8 +4,8 @@
 #include <string>
 
 namespace Format {
-std::string ElapsedTime(long times);  // TODO: See src/format.cpp
-std::string ToPaddedString(int val);
+std::string ElapsedTime(long times);  ///< format time in HH:MM:SS
+std::string ToPaddedString(int val);  ///< adds leading '0' if necessary
 };  // namespace Format
 
 #endif

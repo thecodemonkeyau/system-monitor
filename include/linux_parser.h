@@ -28,7 +28,7 @@ int RunningProcesses();
 std::string OperatingSystem();
 std::string Kernel();
 
-// CPU
+/// @brief  define the field indices for the CPU states
 enum CPUStates {
   kUser_ = 0,
   kNice_,
@@ -42,7 +42,7 @@ enum CPUStates {
   kGuestNice_
 };
 
-// process
+/// @brief define the field indices for the process states
 enum ProcessStates {
   kUtime = 13,
   kStime = 14,
