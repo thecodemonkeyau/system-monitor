@@ -6,6 +6,6 @@
 namespace Format {
 std::string ElapsedTime(long times);  ///< format time in HH:MM:SS
 std::string ToPaddedString(int val);  ///< adds leading '0' if necessary
-};  // namespace Format
+};                                    // namespace Format
 
 #endif
