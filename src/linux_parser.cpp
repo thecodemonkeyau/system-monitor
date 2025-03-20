@@ -3,7 +3,9 @@
 #include <dirent.h>
 #include <unistd.h>
 
+#ifndef BROKEN_CXX17_IMPL
 #include <filesystem>
+#endif
 #include <sstream>
 #include <string>
 #include <vector>
@@ -62,6 +64,24 @@ string LinuxParser::Kernel() {
 /// @return vector of integers representing the PIDs
 vector<int> LinuxParser::Pids() {
   vector<int> pids;
+
+#ifdef BROKEN_CXX17_IMPL
+  DIR* directory = opendir(kProcDirectory.c_str());
+  struct dirent* file;
+  while ((file = readdir(directory)) != nullptr) {
+    // Is this a directory?
+    if (file->d_type == DT_DIR) {
+      // Is every character of the name a digit?
+      string filename(file->d_name);
+      if (std::all_of(filename.begin(), filename.end(), isdigit)) {
+        int pid = stoi(filename);
+        pids.push_back(pid);
+      }
+    }
+  }
+  closedir(directory);
+#else
+  // we have a working C++17 implementationt hat support std::filesystem
   // use std::filesystem to iterate over the directory
   for (const auto &entry :
        std::filesystem::directory_iterator(kProcDirectory)) {
@@ -73,6 +93,8 @@ vector<int> LinuxParser::Pids() {
       }
     }
   }
+
+#endif
   return pids;
 }
 
