@@ -3,7 +3,7 @@
 
 # run this script in your base projects folder to set up the environment
 # for the Udacity C++ System Monitor project
-# this script is for Ubuntu 22.04, it may work on other versions but has not been tested
+# this script is for Ubuntu 20.04 (Focal), it may work on other versions but has not been tested
 # usage: ./udacity_setup.sh
 set -e  # exit on error
 
